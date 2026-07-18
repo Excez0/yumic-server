@@ -25,9 +25,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file flatpak flatpak-builder
 
-      - name: Add Flathub remote
+      - name: Add Flathub remote (user)
         run: |
-          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Build release
         run: cargo build --release --locked
@@ -43,9 +43,9 @@ jobs:
           ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage --desktop-file assets/yumic.desktop --icon-file assets/yumic.svg
 
       - name: Create Flatpak
-        uses: flatpak/flatpak-github-actions@v1
-        with:
-          manifest-path: .flatpak/builder/com.github.Excez0.yumic.json
+        run: |
+          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --user --repo=repo --disable-rofiles-fuse --install-deps-from=flathub flatpak_app .flatpak/builder/com.github.Excez0.yumic.json
 
       - uses: softprops/action-gh-release@v2
         with:
