@@ -1,0 +1,49 @@
+{
+  "app-id": "com.github.Excez0.yumic",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "24.08",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "yumic-server",
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--socket=pulseaudio",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=all",
+    "--talk-name=org.freedesktop.portal.Desktop",
+    "--talk-name=org.freedesktop.portal.Request",
+    "--filesystem=~/.config/yumic:rw",
+    "--filesystem=/tmp/yumic_audio_pipe:rw"
+  ],
+  "modules": [
+    {
+      "name": "openssl",
+      "buildsystem": "simple",
+      "build-commands": [],
+      "sources": [
+        {
+          "type": "file",
+          "path": "Cargo.lock"
+        }
+      ]
+    },
+    {
+      "name": "yumic-server",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo build --release --locked",
+        "install -Dm755 target/release/yumic-server -t /app/bin/",
+        "install -Dm644 assets/yumic.desktop -t /app/share/applications/",
+        "install -Dm644 assets/yumic.svg -t /app/share/icons/hicolor/scalable/apps/"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/Excez0/yumic-server.git",
+          "tag": "v${VERSION}"
+        }
+      ]
+    }
+  ]
+}
