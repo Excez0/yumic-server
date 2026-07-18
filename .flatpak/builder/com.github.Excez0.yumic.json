@@ -24,7 +24,7 @@
       "sources": [
         {
           "type": "file",
-          "path": "Cargo.lock"
+          "path": "../../Cargo.lock"
         }
       ]
     },
