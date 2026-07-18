@@ -37,6 +37,26 @@
 
 ---
 
+## 📥 Downloads
+
+| Platform | Method | Status |
+|----------|--------|--------|
+| **All Linux** | **GitHub Releases** (binary, AppImage, Flatpak) | [![GitHub Release](https://img.shields.io/github/v/release/Excez0/yumic-server?style=flat-square&label=Latest)](https://github.com/Excez0/yumic-server/releases) |
+| **Arch / Manjaro / CachyOS** | **AUR** (`yumic-server`) | [![AUR Version](https://img.shields.io/aur/version/yumic-server?style=flat-square&label=AUR)](https://aur.archlinux.org/packages/yumic-server) |
+| **All Linux (Flatpak)** | **Flathub** (coming soon) | Pending review |
+| **Source** | **Build from source** | See [Installation](#-installation) |
+
+### Quick Install Commands
+
+| Distribution | Command |
+|--------------|---------|
+| **Arch / Manjaro / CachyOS** | `yay -S yumic-server` |
+| **Flatpak (Flathub, soon)** | `flatpak install flathub io.github.Excez0.yumic` |
+| **Manual (all distros)** | `git clone https://github.com/Excez0/yumic-server.git && cd yumic-server && ./install.sh` |
+| **Direct binary** | Download from [Releases](https://github.com/Excez0/yumic-server/releases) → `chmod +x yumic-server && ./yumic-server` |
+
+---
+
 ## 🛠️ Installation
 
 ### 1. Install Dependencies
