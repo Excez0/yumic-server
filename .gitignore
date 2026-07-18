@@ -1,0 +1,7 @@
+/target/
+**/*.rs.bk
+.opencode/
+/tmp/
+test_*.py
+test_*.sh
+sniff.py
