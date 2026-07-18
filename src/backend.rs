@@ -28,7 +28,7 @@ async fn send_cmd(tcp: &mut TcpStream, cmd: u8, payload: &[u8]) -> Result<()> {
     if !payload.is_empty() {
         tcp.write_all(payload).await.context("send cmd payload")?;
     }
-    tcp.flush().await.ok();
+    tcp.flush().await.context("Failed to flush TCP stream")?;
     debug!("Sent cmd=0x{:02X}, {} bytes", cmd, payload.len());
     Ok(())
 }

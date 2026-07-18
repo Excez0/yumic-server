@@ -179,6 +179,8 @@ impl OpusDecoder {
     }
 
     pub fn decode(&mut self, opus_data: &[u8]) -> Result<Vec<u8>> {
+        // 5760 = 48kHz * 120ms max frame size (Opus max frame size at 48kHz)
+        // Opus max frame size at 48kHz = 120ms = 5760 samples
         let mut pcm = vec![0i16; 5760];
         let decoded_samples = self
             .decoder

@@ -7,7 +7,6 @@ mod ui;
 
 use adw::prelude::*;
 use tracing::Level;
-use tracing_subscriber::fmt;
 
 fn main() {
     tracing_subscriber::fmt()
