@@ -1,8 +1,8 @@
 {
   "app-id": "com.github.Excez0.yumic",
-  "runtime": "org.freedesktop.Platform",
-  "runtime-version": "24.08",
-  "sdk": "org.freedesktop.Sdk",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "47",
+  "sdk": "org.gnome.Sdk",
   "sdk-extensions": ["org.freedesktop.Sdk.Extension.rust-stable"],
   "command": "yumic-server",
   "finish-args": [
@@ -28,17 +28,18 @@
       "name": "yumic-server",
       "buildsystem": "simple",
       "build-commands": [
-        "cargo build --release --locked",
-        "install -Dm755 target/release/yumic-server -t /app/bin/",
-        "install -Dm644 assets/yumic.desktop -t /app/share/applications/",
-        "install -Dm644 assets/yumic.svg -t /app/share/icons/hicolor/scalable/apps/"
+        "cargo --offline build --release --locked",
+        "install -Dm755 target/release/yumic-server /app/bin/yumic-server",
+        "install -Dm644 assets/yumic.desktop /app/share/applications/com.github.Excez0.yumic.desktop",
+        "install -Dm644 assets/yumic.svg /app/share/icons/hicolor/scalable/apps/com.github.Excez0.yumic.svg"
       ],
       "sources": [
         {
           "type": "git",
           "url": "https://github.com/Excez0/yumic-server.git",
-          "commit": "HEAD"
-        }
+          "tag": "v1.0.8"
+        },
+        "cargo-sources.json"
       ]
     }
   ]

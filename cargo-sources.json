@@ -1,0 +1,12 @@
+[
+  {
+    "type": "file",
+    "path": "Cargo.lock",
+    "dest": "Cargo.lock"
+  },
+  {
+    "type": "dir",
+    "path": "vendor",
+    "dest": "vendor"
+  }
+]
