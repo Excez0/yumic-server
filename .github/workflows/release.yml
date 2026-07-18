@@ -1,73 +1,43 @@
 name: Release
-
 on:
   push:
     tags:
       - 'v*'
-
 permissions:
   contents: write
   packages: write
-
 jobs:
   build:
-    name: Build & Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config
-
-      - name: Build release
-        run: cargo build --release --locked
-
-      - name: Create AppImage
-        uses: linuxdeploy/linuxdeploy@main
-        with:
-          args: --appdir AppDir --output appimage
-
-      - name: Create Flatpak
-        uses: flatpak/flatpak-github-actions@main
-        with:
-          flatpak-file: .flatpak/builder/com.github.Excez0.yumic.json
-          version: ${{ github.ref_name }}
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            target/release/yumic-server
-            *.flatpak
-            *.AppImage
-          generate_release_notes: true
-
-  aur:
-    name: Update AUR
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout AUR
-        uses: actions/checkout@v4
-        with:
-          repository: Excez0/yumic-server
-          ssh-key: ${{ secrets.AUR_SSH_KEY }}
-          path: aur
-
-      - name: Update PKGBUILD
-        run: |
-          cd aur
-          sed -i "s/pkgver=.*/pkgver=${{ github.ref_name }}/" PKGBUILD
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add PKGBUILD
-          git commit -m "Update to ${{ github.ref_name }}"
-          git push
+  name: Build & Release
+  runs-on: ubuntu-latest
+  steps:
+  - uses: actions/checkout@v4
+  - uses: dtolnay/rust-toolchain@stable
+  - name: Install deps
+  run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file
+  - name: Build
+  run: cargo build --release --locked
+  - name: Create AppImage
+  run: |
+      wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+      chmod +x linuxdeploy-x86_64.AppImage
+      mkdir -p AppDir/usr/bin
+      cp target/release/yumic-server AppDir/usr/bin/yumic-server
+      cp assets/yumic.desktop AppDir/
+      cp assets/yumic.svg AppDir/yumic.svg 2>/dev/null || true
+      ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
+  - name: Create Flatpak
+  uses: flatpak/flatpak-github-actions@main
+  with:
+    flatpak-file: .flatpak/builder/com.github.Excez0.yumic.json
+    version: ${{ github.ref_name }}
+    repo-url: https://flathub.org/repo/flathub.flatpakrepo
+  - uses: softprops/action-gh-release@v2
+  with:
+    files: |
+      target/release/yumic-server
+      *.AppImage
+      *.flatpak
+    generate_release_notes: true
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
