@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <defs>
+    <!-- Arka plan için hafif gri-beyaz geçiş -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E8EAF0"/>
+    </linearGradient>
+    
+    <!-- Mikrofon için açık maviden koyu laciverte geçiş -->
+    <linearGradient id="micGrad" x1="0" y1="24" x2="0" y2="79" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3AC0FF"/>
+      <stop offset="40%" stop-color="#2178F1"/>
+      <stop offset="100%" stop-color="#021E88"/>
+    </linearGradient>
+
+    <!-- Simge altındaki yumuşak gölge -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+
+    <!-- Mikrofon kapsülü üzerindeki şeritlerin (kesiklerin) maskesi -->
+    <mask id="micMask">
+      <rect x="0" y="0" width="100" height="100" fill="white" />
+      
+      <!-- Sol kesikler -->
+      <rect x="34" y="31" width="8" height="3" rx="1.5" fill="black" />
+      <rect x="34" y="37" width="8" height="3" rx="1.5" fill="black" />
+      <rect x="34" y="43" width="8" height="3" rx="1.5" fill="black" />
+      <rect x="34" y="49" width="8" height="3" rx="1.5" fill="black" />
+      
+      <!-- Sağ kesikler -->
+      <rect x="58" y="31" width="8" height="3" rx="1.5" fill="black" />
+      <rect x="58" y="37" width="8" height="3" rx="1.5" fill="black" />
+      <rect x="58" y="43" width="8" height="3" rx="1.5" fill="black" />
+      <rect x="58" y="49" width="8" height="3" rx="1.5" fill="black" />
+    </mask>
+  </defs>
+
+  <!-- Uygulama ikonu çerçevesi (Squircle) -->
+  <rect x="15" y="15" width="70" height="70" rx="16" fill="url(#bgGrad)" filter="url(#shadow)" />
+
+  <!-- Mikrofon orta bağlantı sapı -->
+  <line x1="50" y1="67" x2="50" y2="75" stroke="url(#micGrad)" stroke-width="4.5" stroke-linecap="round" />
+
+  <!-- Mikrofon alt standı -->
+  <path d="M 35 78 Q 50 69 65 78 A 1 1 0 0 1 64 79 L 36 79 A 1 1 0 0 1 35 78 Z" fill="url(#micGrad)" />
+
+  <!-- Mikrofon U-braketi (tutucu) -->
+  <path d="M 31 40 v 10 a 19 19 0 0 0 38 0 v -10" fill="none" stroke="url(#micGrad)" stroke-width="4.5" stroke-linecap="round" />
+
+  <!-- Mikrofon ana kapsülü -->
+  <rect x="38" y="24" width="24" height="42" rx="12" fill="url(#micGrad)" mask="url(#micMask)" />
+</svg>

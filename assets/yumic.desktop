@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=YuMic
+GenericName=Microphone Server
+Comment=Linux microphone server for WO Mic app
+Exec=yumic-server
+Icon=/home/excez/.local/share/icons/hicolor/scalable/apps/yumic.svg
+Terminal=false
+Categories=AudioVideo;Audio;
+Keywords=microphone;audio;streaming;womic;
+StartupNotify=true
