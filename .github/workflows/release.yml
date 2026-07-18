@@ -25,11 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file flatpak flatpak-builder
-
-      - name: Add Flathub remote
-        run: |
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file
 
       - name: Build release
         run: cargo build --release --locked
@@ -44,18 +40,19 @@ jobs:
           cp assets/yumic.svg AppDir/ 2>/dev/null || true
           ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage --desktop-file assets/yumic.desktop --icon-file assets/yumic.svg
 
-      - name: Create Flatpak
-        run: |
-          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user -y flathub org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.rust-stable//24.08
-          flatpak run --command=sh org.freedesktop.Sdk//24.08 -c "flatpak-builder --user --repo=repo --disable-rofiles-fuse --install-deps-from=flathub flatpak_app .flatpak/builder/com.github.Excez0.yumic.json"
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: yumic.flatpak
+          manifest-path: .flatpak/builder/com.github.Excez0.yumic.json
+          cache-key: flatpak-builder-${{ github.sha }}
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             target/release/yumic-server
             *.AppImage
-            *.flatpak
+            yumic.flatpak
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
