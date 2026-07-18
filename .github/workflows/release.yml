@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file
+          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file flatpak flatpak-builder
 
       - name: Build release
         run: cargo build --release --locked
@@ -42,8 +42,6 @@ jobs:
         uses: flatpak/flatpak-github-actions@v1
         with:
           manifest-path: .flatpak/builder/com.github.Excez0.yumic.json
-          version: ${{ github.ref_name }}
-          repo-url: https://flathub.org/repo/flathub.flatpakrepo
 
       - uses: softprops/action-gh-release@v2
         with:
