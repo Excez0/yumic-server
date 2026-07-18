@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use tracing::warn;
 
 const CONFIG_FILE: &str = "config.toml";
 
@@ -67,7 +68,13 @@ impl Config {
     pub fn load() -> Self {
         let path = Self::config_path();
         match std::fs::read_to_string(&path) {
-            Ok(content) => toml::from_str(&content).unwrap_or_default(),
+            Ok(content) => match toml::from_str(&content) {
+                Ok(config) => config,
+                Err(e) => {
+                    warn!("Failed to parse config at {}: {}. Using defaults.", path.display(), e);
+                    Self::default()
+                }
+            },
             Err(_) => Self::default(),
         }
     }

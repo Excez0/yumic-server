@@ -6,7 +6,7 @@ use std::time::Duration;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpStream, UdpSocket};
 use tokio::sync::Mutex;
-use tracing::{debug, info, warn};
+use tracing::{debug, info, warn, error};
 
 const CMD_HELLO: u8 = 0x65;
 const CMD_SET_MEDIA: u8 = 0x66;
@@ -28,7 +28,7 @@ async fn send_cmd(tcp: &mut TcpStream, cmd: u8, payload: &[u8]) -> Result<()> {
     if !payload.is_empty() {
         tcp.write_all(payload).await.context("send cmd payload")?;
     }
-    tcp.flush().await.ok();
+    tcp.flush().await.context("Failed to flush TCP stream")?;
     debug!("Sent cmd=0x{:02X}, {} bytes", cmd, payload.len());
     Ok(())
 }
