@@ -52,7 +52,7 @@ jobs:
         run: |
           flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --user -y flathub org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.rust-stable//24.08
-          flatpak-builder --user --repo=repo --disable-rofiles-fuse --install-deps-from=flathub flatpak_app .flatpak/builder/com.github.Excez0.yumic.json
+          flatpak run --command=sh org.freedesktop.Sdk//24.08 -c "flatpak-builder --user --repo=repo --disable-rofiles-fuse --install-deps-from=flathub flatpak_app .flatpak/builder/com.github.Excez0.yumic.json"
 
       - uses: softprops/action-gh-release@v2
         with:
