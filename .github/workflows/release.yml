@@ -32,7 +32,7 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Install Flatpak SDK extensions
-      - run: |
+        run: |
           flatpak install --user -y flathub org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.rust-stable//24.08
 
       - name: Build release
@@ -50,7 +50,7 @@ jobs:
 
       - name: Create Flatpak
         run: |
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --user -y flathub org.freedesktop.Sdk//24.08 org.freedesktop.Sdk.Extension.rust-stable//24.08
           flatpak run --command=sh org.freedesktop.Sdk//24.08 -c "flatpak-builder --user --repo=repo --disable-rofiles-fuse --install-deps-from=flathub flatpak_app .flatpak/builder/com.github.Excez0.yumic.json"
 
