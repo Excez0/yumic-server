@@ -1,52 +1,56 @@
 name: Release
+
 on:
   push:
     tags:
       - 'v*'
+
 permissions:
   contents: write
   packages: write
+
 jobs:
   build:
-  name: Build & Release
-  runs-on: ubuntu-latest
-  steps:
-  - uses: actions/checkout@v4
+    name: Build & Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  - uses: dtolnay/rust-toolchain@stable
-    with:
-      toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
-  - name: Install dependencies
-  run: |
-    sudo apt-get update
-    sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev libadwaita-1-dev libopus-dev libdbus-1-dev pkg-config wget file
 
-  - name: Build release
-  run: cargo build --release --locked
+      - name: Build release
+        run: cargo build --release --locked
 
-  - name: Create AppImage
-  run: |
-    wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-    chmod +x linuxdeploy-x86_64.AppImage
-    mkdir -p AppDir/usr/bin
-    cp target/release/yumic-server AppDir/usr/bin/yumic-server
-    cp assets/yumic.desktop AppDir/
-    cp assets/yumic.svg AppDir/ 2>/dev/null || true
-    ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
+      - name: Create AppImage
+        run: |
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage
+          mkdir -p AppDir/usr/bin
+          cp target/release/yumic-server AppDir/usr/bin/yumic-server
+          cp assets/yumic.desktop AppDir/
+          cp assets/yumic.svg AppDir/ 2>/dev/null || true
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage --desktop-file assets/yumic.desktop --icon-file assets/yumic.svg
 
-  - name: Create Flatpak
-  uses: flatpak/flatpak-github-actions@v1
-  with:
-    flatpak-file: .flatpak/builder/com.github.Excez0.yumic.json
-    version: ${{ github.ref_name }}
+      - name: Create Flatpak
+        uses: flatpak/flatpak-github-actions@v1
+        with:
+          flatpak-file: .flatpak/builder/com.github.Excez0.yumic.json
+          version: ${{ github.ref_name }}
+          repo-url: https://flathub.org/repo/flathub.flatpakrepo
 
-  - uses: softprops/action-gh-release@v2
-  with:
-    files: |
-      target/release/yumic-server
-      *.AppImage
-      *.flatpak
-    generate_release_notes: true
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/release/yumic-server
+            *.AppImage
+            *.flatpak
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
