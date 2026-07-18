@@ -41,7 +41,7 @@ jobs:
       - name: Create Flatpak
         uses: flatpak/flatpak-github-actions@v1
         with:
-          flatpak-file: .flatpak/builder/com.github.Excez0.yumic.json
+          manifest-path: .flatpak/builder/com.github.Excez0.yumic.json
           version: ${{ github.ref_name }}
           repo-url: https://flathub.org/repo/flathub.flatpakrepo
 
