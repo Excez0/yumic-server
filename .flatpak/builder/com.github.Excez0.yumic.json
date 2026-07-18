@@ -18,6 +18,17 @@
   ],
   "modules": [
     {
+      "name": "rust",
+      "buildsystem": "simple",
+      "build-commands": [],
+      "sources": [
+        {
+          "type": "file",
+          "path": "Cargo.lock"
+        }
+      ]
+    },
+    {
       "name": "yumic-server",
       "buildsystem": "simple",
       "build-commands": [
