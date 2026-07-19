@@ -6,7 +6,7 @@ use std::time::Duration;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpStream, UdpSocket};
 use tokio::sync::Mutex;
-use tracing::{debug, info, warn, error};
+use tracing::{debug, info, warn};
 
 const CMD_HELLO: u8 = 0x65;
 const CMD_SET_MEDIA: u8 = 0x66;

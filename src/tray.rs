@@ -33,13 +33,7 @@ impl TrayHandle {
         });
     }
 
-    pub fn set_error(&self, msg: &str) {
-        self.inner.update(|tray| {
-            *tray.label.lock().unwrap() = format!("YuMic — Error: {}", msg);
-            *tray.icon_name.lock().unwrap() = "dialog-error-symbolic".into();
-            *tray.status.lock().unwrap() = Status::NeedsAttention;
-        });
-    }
+
 }
 
 pub struct YuMicTray {
