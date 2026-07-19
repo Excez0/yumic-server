@@ -45,6 +45,20 @@
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/disconnected.png" alt="Disconnected" width="400"/>
+  &nbsp;&nbsp;
+  <img src="assets/connected.png" alt="Connected" width="400"/>
+</p>
+
+<p align="center">
+  <img src="assets/traybarsetting.png" alt="System Tray" width="400"/>
+</p>
+
+---
+
 ## Install
 
 | Method | Command |
