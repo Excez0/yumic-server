@@ -1,6 +1,6 @@
 [package]
 name = "yumic-server"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 description = "YuMic - Linux microphone server with GTK4 UI"
 

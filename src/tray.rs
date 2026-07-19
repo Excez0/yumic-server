@@ -4,6 +4,7 @@ use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 
 use crate::backend::BackendCommand;
+use crate::config::Config;
 
 #[derive(Debug, Clone)]
 pub enum UiCommand {
@@ -32,8 +33,6 @@ impl TrayHandle {
             *tray.status.lock().unwrap() = Status::Active;
         });
     }
-
-
 }
 
 pub struct YuMicTray {
@@ -42,16 +41,18 @@ pub struct YuMicTray {
     status: Arc<Mutex<Status>>,
     cmd_tx: Sender<BackendCommand>,
     ui_tx: Sender<UiCommand>,
+    config: Arc<Mutex<Config>>,
 }
 
 impl YuMicTray {
-    pub fn new(cmd_tx: Sender<BackendCommand>, ui_tx: Sender<UiCommand>) -> Self {
+    pub fn new(cmd_tx: Sender<BackendCommand>, ui_tx: Sender<UiCommand>, config: Arc<Mutex<Config>>) -> Self {
         Self {
             label: Arc::new(Mutex::new("YuMic — Disconnected".into())),
             icon_name: Arc::new(Mutex::new("microphone-sensitivity-muted-symbolic".into())),
             status: Arc::new(Mutex::new(Status::Active)),
             cmd_tx,
             ui_tx,
+            config,
         }
     }
 
@@ -128,14 +129,16 @@ impl Tray for YuMicTray {
             );
         } else {
             let cmd_tx = self.cmd_tx.clone();
+            let cfg = self.config.clone();
             items.push(
                 StandardItem {
                     label: "Connect".into(),
                     activate: Box::new(move |_| {
+                        let c = cfg.lock().unwrap();
                         let _ = cmd_tx.send(BackendCommand::Connect {
-                            ip: "192.168.1.105".into(),
-                            control_port: 8125,
-                            media_port: 49152,
+                            ip: c.phone_ip.clone(),
+                            control_port: c.control_port,
+                            media_port: c.media_port,
                         });
                     }),
                     ..Default::default()
