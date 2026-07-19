@@ -3,7 +3,7 @@ use std::io::Write;
 use std::process::Command;
 use tracing::{debug, info, warn};
 
-const PIPE_PATH: &str = "/tmp/yumic_audio_pipe";
+pub const PIPE_PATH: &str = "/tmp/yumic_audio_pipe";
 
 /// PulseAudio module manager - creates a virtual source from a FIFO pipe.
 pub struct PulseAudioModules {

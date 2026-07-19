@@ -165,7 +165,7 @@ async fn run_backend(
                             continue;
                         }
 
-                         match connect_to_phone(&ip, control_port, media_port).await {
+                        match connect_to_phone(&ip, control_port, media_port).await {
                             Ok((session, drain, hb)) => {
                                 connection = Some(session);
                                 heartbeat_handle = Some(hb);

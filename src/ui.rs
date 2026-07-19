@@ -1,5 +1,6 @@
 use adw::prelude::*;
 use std::sync::mpsc::{Sender, Receiver};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use crate::backend::{BackendCommand, BackendEvent};
@@ -7,20 +8,20 @@ use crate::config::{Config, Theme};
 use crate::meter::AudioMeter;
 use crate::tray::YuMicTray;
 
-const PIPE_PATH: &str = "/tmp/yumic_audio_pipe";
-
 pub fn build_ui(app: &adw::Application) {
     let config = Config::load();
     apply_theme(&config.theme);
+
+    let shared_config = Arc::new(Mutex::new(config.clone()));
 
     let (event_tx, event_rx): (Sender<BackendEvent>, Receiver<BackendEvent>) = std::sync::mpsc::channel();
     let (cmd_tx, cmd_rx): (Sender<BackendCommand>, Receiver<BackendCommand>) = std::sync::mpsc::channel();
     let (ui_tx, ui_rx) = std::sync::mpsc::channel::<crate::tray::UiCommand>();
 
-    crate::backend::spawn_backend(event_tx, cmd_rx, PIPE_PATH, &config.source_name);
+    crate::backend::spawn_backend(event_tx, cmd_rx, crate::audio::PIPE_PATH, &config.source_name);
 
     // Create system tray
-    let tray = YuMicTray::new(cmd_tx.clone(), ui_tx);
+    let tray = YuMicTray::new(cmd_tx.clone(), ui_tx, shared_config.clone());
     let tray_handle = tray.start();
 
     let window = adw::ApplicationWindow::builder()
@@ -124,6 +125,7 @@ pub fn build_ui(app: &adw::Application) {
         let ip_row_ref = ip_row.clone();
         let status_label_ref = status_label.clone();
         let connect_button_ref = connect_button.clone();
+        let cfg_for_connect = shared_config.clone();
 
         connect_button.connect_clicked(move |btn| {
             let is_disconnect = btn.label().as_deref() == Some("Disconnect");
@@ -138,6 +140,11 @@ pub fn build_ui(app: &adw::Application) {
                 status_label_ref.add_css_class("dim-label");
             } else {
                 let ip = ip_row_ref.text().to_string();
+                let c = cfg_for_connect.lock().unwrap();
+                let control_port = c.control_port;
+                let media_port = c.media_port;
+                drop(c);
+
                 btn.set_label("Disconnect");
                 btn.remove_css_class("suggested-action");
                 btn.add_css_class("destructive-action");
@@ -148,7 +155,6 @@ pub fn build_ui(app: &adw::Application) {
 
                 let status_label2 = status_label_ref.clone();
                 let connect_button2 = connect_button_ref.clone();
-                let cmd_tx2 = cmd_tx_connect.clone();
 
                 glib::timeout_add_local_once(Duration::from_secs(3), move || {
                     connect_button2.set_sensitive(true);
@@ -162,10 +168,10 @@ pub fn build_ui(app: &adw::Application) {
                     }
                 });
 
-                let _ = cmd_tx2.send(BackendCommand::Connect {
+                let _ = cmd_tx_connect.send(BackendCommand::Connect {
                     ip,
-                    control_port: 8125,
-                    media_port: 49152,
+                    control_port,
+                    media_port,
                 });
             }
         });
@@ -191,32 +197,65 @@ pub fn build_ui(app: &adw::Application) {
     // ─── Settings ───
     let settings_group = adw::PreferencesGroup::builder().title("Settings").build();
 
-    let _control_port_row = adw::SpinRow::builder()
+    let control_port_row = adw::SpinRow::builder()
         .title("Control Port (TCP)")
         .subtitle("Default: 8125")
         .adjustment(&gtk::Adjustment::new(config.control_port as f64, 1024.0, 65535.0, 1.0, 10.0, 0.0))
         .build();
 
-    let _media_port_row = adw::SpinRow::builder()
+    let media_port_row = adw::SpinRow::builder()
         .title("Media Port (UDP)")
         .subtitle("Default: 49152")
         .adjustment(&gtk::Adjustment::new(config.media_port as f64, 1024.0, 65535.0, 1.0, 10.0, 0.0))
         .build();
 
-    let _source_row = adw::EntryRow::builder()
+    let source_row = adw::EntryRow::builder()
         .title("PulseAudio Source Name")
         .text(&config.source_name)
         .build();
 
-    let _auto_row = adw::SwitchRow::builder()
+    let auto_row = adw::SwitchRow::builder()
         .title("Auto-connect on startup")
         .active(config.auto_connect)
         .build();
 
-    settings_group.add(&_control_port_row);
-    settings_group.add(&_media_port_row);
-    settings_group.add(&_source_row);
-    settings_group.add(&_auto_row);
+    {
+        let cfg = shared_config.clone();
+        control_port_row.connect_value_notify(move |row| {
+            let val = row.value() as u16;
+            cfg.lock().unwrap().control_port = val;
+            let _ = cfg.lock().unwrap().save();
+        });
+    }
+    {
+        let cfg = shared_config.clone();
+        media_port_row.connect_value_notify(move |row| {
+            let val = row.value() as u16;
+            cfg.lock().unwrap().media_port = val;
+            let _ = cfg.lock().unwrap().save();
+        });
+    }
+    {
+        let cfg = shared_config.clone();
+        source_row.connect_changed(move |row| {
+            let val = row.text().to_string();
+            cfg.lock().unwrap().source_name = val;
+            let _ = cfg.lock().unwrap().save();
+        });
+    }
+    {
+        let cfg = shared_config.clone();
+        auto_row.connect_active_notify(move |row| {
+            let val = row.is_active();
+            cfg.lock().unwrap().auto_connect = val;
+            let _ = cfg.lock().unwrap().save();
+        });
+    }
+
+    settings_group.add(&control_port_row);
+    settings_group.add(&media_port_row);
+    settings_group.add(&source_row);
+    settings_group.add(&auto_row);
     content.append(&settings_group);
 
     // ─── Theme ───
@@ -241,7 +280,8 @@ pub fn build_ui(app: &adw::Application) {
             _ => Theme::System,
         };
         apply_theme(&theme);
-        let mut cfg = Config::load();
+        let cfg_theme = shared_config.clone();
+        let mut cfg = cfg_theme.lock().unwrap();
         cfg.theme = theme;
         let _ = cfg.save();
     });
@@ -253,7 +293,7 @@ pub fn build_ui(app: &adw::Application) {
     main_box.append(&scrolled);
 
     let footer = gtk::Label::builder()
-        .label("YuMic v0.2.0")
+        .label("YuMic v1.0.3")
         .css_classes(["dim-label", "caption"])
         .margin_top(8)
         .margin_bottom(8)
@@ -293,7 +333,7 @@ pub fn build_ui(app: &adw::Application) {
                     connect_button.remove_css_class("suggested-action");
                     connect_button.add_css_class("destructive-action");
                     connect_button.set_sensitive(true);
-                    footer.set_text("YuMic v0.2.0 — Connected");
+                    footer.set_text("YuMic v1.0.3 — Connected");
                     tray_clone.set_connected();
                 }
                 BackendEvent::Disconnected => {
@@ -308,7 +348,7 @@ pub fn build_ui(app: &adw::Application) {
                     connect_button.set_sensitive(true);
                     level_bar.set_level(0.0);
                     level_bar.set_peak(0.0);
-                    footer.set_text("YuMic v0.2.0");
+                    footer.set_text("YuMic v1.0.3");
                     tray_clone.set_disconnected();
                 }
                 BackendEvent::Error(msg) => {
